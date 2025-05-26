@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import '../widgets/auth_text_field.dart';
 import '../widgets/auth_button.dart';
 
@@ -14,11 +16,40 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
-  void _submitLogin() {
+  void _submitLogin() async {
     if (_formKey.currentState!.validate()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Logging in...')),
-      );
+      final email = emailController.text.trim();
+      final password = passwordController.text;
+
+      final url = Uri.parse(
+          'http://localhost:8000/api/accounts/login/'); // Update to your actual login endpoint
+      try {
+        final response = await http.post(
+          url,
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({'email': email, 'password': password}),
+        );
+
+        if (response.statusCode == 200) {
+          // Login successful
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Login successful!')),
+          );
+          Navigator.popAndPushNamed(context, '/dashboard');
+        } else {
+          // Show error from backend
+          final data = jsonDecode(response.body);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content:
+                    Text(data['error'] ?? data['detail'] ?? 'Login failed')),
+          );
+        }
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e')),
+        );
+      }
     }
   }
 
