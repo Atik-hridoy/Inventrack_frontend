@@ -1,12 +1,22 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 class ApiService {
   // Configuration - Set your base URL here
-  //static const String baseUrl = 'http://127.0.0.1:3000/api'; // Android emulator
-  static const String baseUrl = 'http://localhost:8000/api'; // iOS simulator
-  // static const String baseUrl = 'http://<your-ip>:8000/api'; // Physical device
+  static String get baseUrl {
+    if (kIsWeb) {
+      // For Flutter Web, use your machine's LAN IP (not localhost or 127.0.0.1)
+      return 'http://192.168.x.x:8000/api'; // <-- Replace with your real LAN IP
+    } else if (Platform.isAndroid) {
+      // For Android emulator, use 10.0.2.2
+      return 'http://10.0.2.2:8000/api';
+    } else {
+      // For iOS simulator or other platforms
+      return 'http://localhost:8000/api';
+    }
+  }
 
   // Timeout settings
   static const Duration connectTimeout = Duration(seconds: 15);
@@ -181,6 +191,79 @@ class ApiService {
       return _processResponse(response, debug: debug);
     } catch (e) {
       return _buildErrorResponse(e.toString());
+    }
+  }
+}
+
+/// A simple Auth API service for login and registration.
+class AuthApiService {
+  static String get baseUrl => '${ApiService.baseUrl}/accounts';
+
+  /// Registers a new user.
+  static Future<Map<String, dynamic>> register({
+    required String email,
+    required String password,
+    required String confirmPassword,
+  }) async {
+    final url = Uri.parse('$baseUrl/register/');
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'email': email,
+          'password': password,
+          'confirm_password': confirmPassword,
+        }),
+      );
+      final data = _decodeResponse(response);
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        return {'success': true, 'data': data};
+      } else {
+        return {
+          'success': false,
+          'error': data['error'] ??
+              data['message'] ??
+              data['errors']?.toString() ??
+              'Registration failed'
+        };
+      }
+    } catch (e) {
+      return {'success': false, 'error': 'Could not connect to the server.'};
+    }
+  }
+
+  /// Logs in a user.
+  static Future<Map<String, dynamic>> login({
+    required String email,
+    required String password,
+  }) async {
+    final url = Uri.parse('$baseUrl/login/');
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': email, 'password': password}),
+      );
+      final data = _decodeResponse(response);
+      if (response.statusCode == 200) {
+        return {'success': true, 'data': data};
+      } else {
+        return {
+          'success': false,
+          'error': data['error'] ?? data['detail'] ?? 'Login failed'
+        };
+      }
+    } catch (e) {
+      return {'success': false, 'error': 'Could not connect to the server.'};
+    }
+  }
+
+  static dynamic _decodeResponse(http.Response response) {
+    try {
+      return jsonDecode(response.body);
+    } catch (_) {
+      return {};
     }
   }
 }
