@@ -1,9 +1,10 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../core/services/api_service.dart'; // Import your API service
-import '../widgets/auth_text_field.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -28,7 +29,12 @@ class _LoginScreenState extends State<LoginScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Login successful!')),
         );
-        Navigator.popAndPushNamed(context, '/dashboard');
+        final userRole = result['data']['role'];
+        if (userRole == 'staff') {
+          Navigator.pushReplacementNamed(context, '/dashboard');
+        } else {
+          Navigator.pushReplacementNamed(context, '/product-feed');
+        }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(result['error'] ?? 'Login failed')),

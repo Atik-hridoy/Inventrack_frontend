@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import '../../../core/services/api_service.dart'; // Import your AuthApiService
 
@@ -15,6 +17,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController confirmPasswordController =
       TextEditingController();
 
+  String selectedRole = 'user'; // Default role
+
   bool isLoading = false;
   String? errorMessage;
 
@@ -27,11 +31,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final email = emailController.text.trim();
     final password = passwordController.text;
     final confirmPassword = confirmPasswordController.text;
+    final role = selectedRole;
 
     final result = await AuthApiService.register(
       email: email,
       password: password,
       confirmPassword: confirmPassword,
+      role: role, // Pass role to API
     );
 
     setState(() {
@@ -42,6 +48,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Registration successful!')),
       );
+      final userRole = result['data']['role'];
+      if (userRole == 'staff') {
+        Navigator.pushReplacementNamed(context, '/dashboard');
+      } else {
+        Navigator.pushReplacementNamed(context, '/product-feed');
+      }
       Navigator.pushReplacementNamed(context, '/');
     } else {
       setState(() {
@@ -144,6 +156,35 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         validator: (val) => val == passwordController.text
                             ? null
                             : 'Passwords do not match',
+                      ),
+                      const SizedBox(height: 16),
+                      // Add role dropdown here
+                      DropdownButtonFormField<String>(
+                        value: selectedRole,
+                        decoration: InputDecoration(
+                          labelText: 'Role',
+                          prefixIcon: const Icon(Icons.person),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        items: const [
+                          DropdownMenuItem(
+                            value: 'user',
+                            child: Text('User'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'staff',
+                            child: Text('Staff'),
+                          ),
+                        ],
+                        onChanged: (value) {
+                          setState(() {
+                            selectedRole = value!;
+                          });
+                        },
+                        validator: (val) =>
+                            val == null ? 'Please select a role' : null,
                       ),
                       const SizedBox(height: 24),
                       isLoading

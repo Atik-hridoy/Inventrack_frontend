@@ -1,22 +1,16 @@
-import 'package:http/http.dart' as http;
-
-
 import 'dart:convert';
+import 'package:http/http.dart' as http;
+import '../models/product.dart'; // Make sure this import points to your model
 
 class ProductApi {
-  static Future<Map<String, dynamic>> getProducts() async {
-    return await ApiService.get('products/');
-  }
-}
-
-class ApiService {
-  static Future<Map<String, dynamic>> get(String endpoint) async {
-    final response =
-        await http.get(Uri.parse('https://127.0.0.1:8000/$endpoint'));
+  static Future<List<Product>> getProducts() async {
+    final response = await http.get(Uri.parse(
+        'http://127.0.0.1:8000/api/products/')); // Or use ApiService.get if you're using that
     if (response.statusCode == 200) {
-      return json.decode(response.body) as Map<String, dynamic>;
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((item) => Product.fromJson(item)).toList();
     } else {
-      throw Exception('Failed to load data');
+      throw Exception('Failed to load products');
     }
   }
 }
