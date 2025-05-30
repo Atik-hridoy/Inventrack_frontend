@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
@@ -8,12 +10,10 @@ class ApiService {
   static String get baseUrl {
     if (kIsWeb) {
       // For Flutter Web, use your machine's LAN IP (not localhost or 127.0.0.1)
-      return 'http://192.168.x.x:8000/api'; // <-- Replace with your real LAN IP
+      return 'http://192.168.0.103:8000/api'; // <-- Replace with your real LAN IP
     } else if (Platform.isAndroid) {
-      // For Android emulator, use 10.0.2.2
       return 'http://10.0.2.2:8000/api';
     } else {
-      // For iOS simulator or other platforms
       return 'http://localhost:8000/api';
     }
   }
@@ -57,7 +57,7 @@ class ApiService {
         body: encodedData,
       )
           .timeout(receiveTimeout, onTimeout: () {
-        throw SocketException('Request timed out');
+        throw const SocketException('Request timed out');
       });
 
       if (debug) {
@@ -204,6 +204,7 @@ class AuthApiService {
     required String email,
     required String password,
     required String confirmPassword,
+    required String role, // Add this
   }) async {
     final url = Uri.parse('$baseUrl/register/');
     try {
@@ -214,6 +215,7 @@ class AuthApiService {
           'email': email,
           'password': password,
           'confirm_password': confirmPassword,
+          'role': role, // Send role to backend
         }),
       );
       final data = _decodeResponse(response);
@@ -264,6 +266,88 @@ class AuthApiService {
       return jsonDecode(response.body);
     } catch (_) {
       return {};
+    }
+  }
+}
+
+class ProductApiService {
+  static String get baseUrl => '${ApiService.baseUrl}/inventory';
+
+  /// Fetches all products for the feed (list all).
+  static Future<Map<String, dynamic>> getProductFeed() async {
+    // This matches your Django endpoint: path('list/', ProductListView.as_view(), name='product-list')
+    return await ApiService.get('inventory/list/');
+  }
+
+  /// Creates a new product (cross-platform: supports web and mobile).
+  static Future<Map<String, dynamic>> createProduct({
+    required String name,
+    required String sku,
+    required double price,
+    required int quantity,
+    String? imageBase64, // For web
+    File? imageFile, // For mobile
+  }) async {
+    final url = Uri.parse('$baseUrl/create/');
+    try {
+      if (kIsWeb) {
+        // Web: Send as JSON with base64 image
+        Map<String, dynamic> body = {
+          'name': name,
+          'sku': sku,
+          'price': price,
+          'quantity': quantity,
+        };
+        if (imageBase64 != null) {
+          body['image_base64'] = imageBase64;
+        }
+        final response = await http.post(
+          url,
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode(body),
+        );
+        final data = AuthApiService._decodeResponse(response);
+        if (response.statusCode == 201 || response.statusCode == 200) {
+          return {'success': true, 'data': data};
+        } else {
+          return {
+            'success': false,
+            'error': data['error'] ??
+                data['message'] ??
+                data['errors']?.toString() ??
+                'Failed to create product'
+          };
+        }
+      } else {
+        // Mobile: Send as multipart/form-data
+        var request = http.MultipartRequest('POST', url);
+        request.fields['name'] = name;
+        request.fields['sku'] = sku;
+        request.fields['price'] = price.toString();
+        request.fields['quantity'] = quantity.toString();
+
+        if (imageFile != null) {
+          request.files
+              .add(await http.MultipartFile.fromPath('image', imageFile.path));
+        }
+
+        final streamedResponse = await request.send();
+        final response = await http.Response.fromStream(streamedResponse);
+        final data = AuthApiService._decodeResponse(response);
+        if (response.statusCode == 201 || response.statusCode == 200) {
+          return {'success': true, 'data': data};
+        } else {
+          return {
+            'success': false,
+            'error': data['error'] ??
+                data['message'] ??
+                data['errors']?.toString() ??
+                'Failed to create product'
+          };
+        }
+      }
+    } catch (e) {
+      return {'success': false, 'error': 'Could not connect to the server.'};
     }
   }
 }
