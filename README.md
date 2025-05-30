@@ -20,7 +20,9 @@ This repository contains the **frontend** for the Inventrack system, built using
 
 ## 📁 Directory Structure
 
-``` lib/ ├── config/ │ └── app_theme.dart │ ├── features/ │ ├── auth/ │ │ └── screens/ │ │ ├── login_screen.dart │ │ └── register_screen.dart │ │ │ └── dashboard/ │ └── screens/ │ └── dashboard_screen.dart │ ├── routes/ │ └── app_routes.dart │ ├── app.dart └── main.dart ```
+```bash
+lib/ ├── config/ │ └── app_theme.dart │ ├── features/ │ ├── auth/ │ │ └── screens/ │ │ ├── login_screen.dart │ │ └── register_screen.dart │ │ │ └── dashboard/ │ └── screens/ │ └── dashboard_screen.dart │ ├── routes/ │ └── app_routes.dart │ ├── app.dart └── main.dart
+```
 
 
 
