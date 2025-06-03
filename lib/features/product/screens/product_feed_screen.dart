@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:inventrack_frontend/core/services/api_service.dart';
+
+import 'package:inventrack_frontend/data/data_providers/product_api.dart';
 import '../../../data/models/product.dart';
 
 class ProductFeedScreen extends StatefulWidget {

@@ -1,12 +1,10 @@
-// ignore_for_file: use_build_context_synchronously
-
 import 'dart:io';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:image_picker/image_picker.dart';
-import '../../../core/services/api_service.dart';
+import 'package:inventrack_frontend/data/data_providers/product_api.dart';
 
 class AddProductScreen extends StatefulWidget {
   const AddProductScreen({super.key});

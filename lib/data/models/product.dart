@@ -22,8 +22,30 @@ class Product {
         name: json['name'],
         sku: json['sku'],
         description: json['description'] ?? '',
-        quantity: json['quantity'],
-        price: double.parse(json['price'].toString()),
+        quantity: json['quantity'] ?? 0,
+        price: _parsePrice(json['price']),
         image: json['image'] ?? '',
       );
+
+  static double _parsePrice(dynamic value) {
+    if (value == null) return 0.0;
+    if (value is num) return value.toDouble();
+    if (value is String) return double.tryParse(value) ?? 0.0;
+    return 0.0;
+  }
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'name': name,
+        'sku': sku,
+        'description': description,
+        'quantity': quantity,
+        'price': price,
+        'image': image,
+      };
+
+  @override
+  String toString() {
+    return 'Product{id: $id, name: $name, sku: $sku, description: $description, quantity: $quantity, price: $price, image: $image}';
+  }
 }

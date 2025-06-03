@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:inventrack_frontend/data/data_providers/product_api.dart';
 
 import '../../../data/models/product.dart';
-import 'package:inventrack_frontend/core/services/api_service.dart';
 
 class ProductListScreen extends StatefulWidget {
   const ProductListScreen({super.key});
@@ -73,7 +73,12 @@ class _ProductListScreenState extends State<ProductListScreen> {
                   trailing: Text('\$${product.price.toStringAsFixed(2)}'),
                   isThreeLine: true,
                   onTap: () {
-                    // TODO: Navigate to details/edit screen
+                    Navigator.pushNamed(
+                      context,
+                      '/edit-product',
+                      arguments: product
+                          .toJson(), // or product as Map<String, dynamic>
+                    );
                   },
                 );
               },
