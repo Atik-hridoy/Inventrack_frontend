@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:provider/provider.dart';
 import '../../../core/services/api_service.dart'; // Import your API service
+import '../../../core/providers/user_provider.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -29,12 +31,19 @@ class _LoginScreenState extends State<LoginScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Login successful!')),
         );
-        final userRole = result['data']['role'];
-        if (userRole == 'staff') {
-          Navigator.pushReplacementNamed(context, '/dashboard');
-        } else {
-          Navigator.pushReplacementNamed(context, '/product-feed');
-        }
+        // After successful login and receiving the user object:
+        final user = result['data']['user'];
+        final email = user['email'];
+        final staffName = user['first_name'] ?? user['username'] ?? '';
+
+        final userProvider = Provider.of<UserProvider>(context, listen: false);
+        userProvider.setEmail(email);
+        userProvider.setStaffName(staffName);
+
+        // Optionally, fetch from backend for latest info:
+        await userProvider.fetchAndSetUserInfo(email: email);
+
+        Navigator.pushReplacementNamed(context, '/dashboard');
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(result['error'] ?? 'Login failed')),

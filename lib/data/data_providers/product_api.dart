@@ -19,7 +19,6 @@ class ApiService {
   }
 
   // Timeout settings
-  static const Duration connectTimeout = Duration(seconds: 15);
   static const Duration receiveTimeout = Duration(seconds: 15);
 
   // Default headers for JSON API
@@ -52,13 +51,11 @@ class ApiService {
       // Make the request with timeouts
       final response = await http
           .post(
-        url,
-        headers: headers,
-        body: encodedData,
-      )
-          .timeout(receiveTimeout, onTimeout: () {
-        throw const SocketException('Request timed out');
-      });
+            url,
+            headers: headers,
+            body: encodedData,
+          )
+          .timeout(receiveTimeout);
 
       if (debug) {
         print('📥 Response Status: ${response.statusCode}');

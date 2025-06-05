@@ -10,7 +10,7 @@ class ApiService {
   static String get baseUrl {
     if (kIsWeb) {
       // For Flutter Web, use your machine's LAN IP (not localhost or 127.0.0.1)
-      return 'http://192.168.1.5:8000/api'; // <-- Replace with your real LAN IP
+      return 'http://192.168.1.3:8000/api'; // <-- Replace with your real LAN IP
     } else if (Platform.isAndroid) {
       return 'http://10.0.2.2:8000/api';
     } else {
@@ -202,37 +202,22 @@ class AuthApiService {
   /// Registers a new user.
   static Future<Map<String, dynamic>> register({
     required String email,
+    required String username, // <-- Add this
     required String password,
     required String confirmPassword,
     required String role, // Add this
   }) async {
-    final url = Uri.parse('$baseUrl/register/');
-    try {
-      final response = await http.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'email': email,
-          'password': password,
-          'confirm_password': confirmPassword,
-          'role': role, // Send role to backend
-        }),
-      );
-      final data = _decodeResponse(response);
-      if (response.statusCode == 201 || response.statusCode == 200) {
-        return {'success': true, 'data': data};
-      } else {
-        return {
-          'success': false,
-          'error': data['error'] ??
-              data['message'] ??
-              data['errors']?.toString() ??
-              'Registration failed'
-        };
-      }
-    } catch (e) {
-      return {'success': false, 'error': 'Could not connect to the server.'};
-    }
+    final response = await ApiService.post(
+      'accounts/register/',
+      {
+        'email': email,
+        'username': username, // <-- Add this
+        'password': password,
+        'confirm_password': confirmPassword,
+        'role': role, // Send role to backend
+      },
+    );
+    return response;
   }
 
   /// Logs in a user.
