@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:inventrack_frontend/core/services/auth_api_service.dart';
 import 'package:provider/provider.dart';
-import '../../../core/services/api_service.dart'; // Import your API service
 import '../../../core/providers/user_provider.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -27,23 +27,33 @@ class _LoginScreenState extends State<LoginScreen> {
         password: passwordController.text,
       );
 
+      print('DEBUG: login result = $result');
+
       if (result['success'] == true) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Login successful!')),
-        );
-        // After successful login and receiving the user object:
-        final user = result['data']['user'];
+        // Try to get user object, or fallback to top-level fields
+        final user = result['data']?['user'] ?? result['data'];
+        if (user == null || user['email'] == null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                content: Text('Login failed: No user data returned.')),
+          );
+          return;
+        }
         final email = user['email'];
-        final staffName = user['first_name'] ?? user['username'] ?? '';
+        final staffName = user['username'] ?? '';
+        final role = user['role'] ?? 'user';
 
         final userProvider = Provider.of<UserProvider>(context, listen: false);
         userProvider.setEmail(email);
         userProvider.setStaffName(staffName);
 
-        // Optionally, fetch from backend for latest info:
         await userProvider.fetchAndSetUserInfo(email: email);
 
-        Navigator.pushReplacementNamed(context, '/dashboard');
+        if (role == 'staff') {
+          Navigator.pushReplacementNamed(context, '/dashboard');
+        } else {
+          Navigator.pushReplacementNamed(context, '/product-feed');
+        }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(result['error'] ?? 'Login failed')),
@@ -91,7 +101,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             Animate(
                               effects: [
                                 FadeEffect(duration: 600.ms),
-                                ScaleEffect()
+                                const ScaleEffect()
                               ],
                               child: CircleAvatar(
                                 radius: 36,

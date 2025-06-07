@@ -1,7 +1,5 @@
-// ignore_for_file: use_build_context_synchronously
-
 import 'package:flutter/material.dart';
-import '../../../core/services/api_service.dart'; // Import your AuthApiService
+import 'package:inventrack_frontend/core/services/auth_api_service.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});

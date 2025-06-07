@@ -10,7 +10,7 @@ class ApiService {
   static String get baseUrl {
     if (kIsWeb) {
       // For Flutter Web, use your machine's LAN IP (not localhost or 127.0.0.1)
-      return 'http://192.168.1.5:8000/api'; // <-- Replace with your real LAN IP
+      return 'http://192.168.1.4:8000/api'; // <-- Replace with your real LAN IP
     } else if (Platform.isAndroid) {
       return 'http://10.0.2.2:8000/api';
     } else {
@@ -197,27 +197,37 @@ class ProductApiService {
 
   /// Fetches all products for the feed (list all).
   static Future<Map<String, dynamic>> getProductFeed() async {
+    // Matches: /inventory/
     return await ApiService.get('inventory/');
   }
 
-  /// Creates a new product (cross-platform: supports web and mobile).
+  /// Fetches a single product by ID.
+  static Future<Map<String, dynamic>> getProductById(int id) async {
+    // Matches: /inventory/<id>/
+    return await ApiService.get('inventory/$id/');
+  }
+
+  /// Creates a new product.
   static Future<Map<String, dynamic>> createProduct({
     required String name,
     required String sku,
     required double price,
     required int quantity,
+    String? description,
+    String? category,
     String? imageBase64, // For web
     File? imageFile, // For mobile
   }) async {
     final url = Uri.parse('$baseUrl/');
     try {
       if (kIsWeb) {
-        // Web: Send as JSON with base64 image
         Map<String, dynamic> body = {
           'name': name,
           'sku': sku,
           'price': price,
           'quantity': quantity,
+          if (description != null) 'description': description,
+          if (category != null) 'category': category,
         };
         if (imageBase64 != null) {
           body['image_base64'] = imageBase64;
@@ -240,18 +250,17 @@ class ProductApiService {
           };
         }
       } else {
-        // Mobile: Send as multipart/form-data
         var request = http.MultipartRequest('POST', url);
         request.fields['name'] = name;
         request.fields['sku'] = sku;
         request.fields['price'] = price.toString();
         request.fields['quantity'] = quantity.toString();
-
+        if (description != null) request.fields['description'] = description;
+        if (category != null) request.fields['category'] = category;
         if (imageFile != null) {
           request.files
               .add(await http.MultipartFile.fromPath('image', imageFile.path));
         }
-
         final streamedResponse = await request.send();
         final response = await http.Response.fromStream(streamedResponse);
         final data = ApiService._processResponse(response);
@@ -279,18 +288,21 @@ class ProductApiService {
     required String sku,
     required double price,
     required int quantity,
+    String? description,
+    String? category,
     String? imageBase64, // Optional: for web
     File? imageFile, // Optional: for mobile
   }) async {
     final url = Uri.parse('$baseUrl/$id/');
     try {
       if (kIsWeb) {
-        // Web: Send as JSON
         Map<String, dynamic> body = {
           'name': name,
           'sku': sku,
           'price': price,
           'quantity': quantity,
+          if (description != null) 'description': description,
+          if (category != null) 'category': category,
         };
         if (imageBase64 != null) {
           body['image_base64'] = imageBase64;
@@ -313,18 +325,17 @@ class ProductApiService {
           };
         }
       } else {
-        // Mobile: Send as multipart/form-data
         var request = http.MultipartRequest('PUT', url);
         request.fields['name'] = name;
         request.fields['sku'] = sku;
         request.fields['price'] = price.toString();
         request.fields['quantity'] = quantity.toString();
-
+        if (description != null) request.fields['description'] = description;
+        if (category != null) request.fields['category'] = category;
         if (imageFile != null) {
           request.files
               .add(await http.MultipartFile.fromPath('image', imageFile.path));
         }
-
         final streamedResponse = await request.send();
         final response = await http.Response.fromStream(streamedResponse);
         final data = ApiService._processResponse(response);
@@ -372,6 +383,7 @@ class ProductApiService {
 
   /// Fetches product modifications (if needed)
   static Future<Map<String, dynamic>> getProductModifications() async {
+    // Matches: /inventory/modifications/
     return await ApiService.get('inventory/modifications/');
   }
 }
