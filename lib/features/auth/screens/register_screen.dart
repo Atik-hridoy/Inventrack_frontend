@@ -1,7 +1,5 @@
-// ignore_for_file: use_build_context_synchronously
-
 import 'package:flutter/material.dart';
-import '../../../core/services/api_service.dart'; // Import your AuthApiService
+import 'package:inventrack_frontend/core/services/auth_api_service.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -13,6 +11,8 @@ class RegisterScreen extends StatefulWidget {
 class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController emailController = TextEditingController();
+  final TextEditingController usernameController =
+      TextEditingController(); // <-- Add this
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController =
       TextEditingController();
@@ -29,12 +29,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
     });
 
     final email = emailController.text.trim();
+    final username = usernameController.text.trim(); // <-- Add this
     final password = passwordController.text;
     final confirmPassword = confirmPasswordController.text;
     final role = selectedRole;
 
     final result = await AuthApiService.register(
       email: email,
+      username: username, // <-- Add this
       password: password,
       confirmPassword: confirmPassword,
       role: role, // Pass role to API
@@ -114,6 +116,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             style: const TextStyle(color: Colors.red),
                           ),
                         ),
+                      // Username field
+                      TextFormField(
+                        controller: usernameController,
+                        decoration: InputDecoration(
+                          labelText: 'Username',
+                          prefixIcon: const Icon(Icons.person),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        validator: (val) => val != null && val.length >= 3
+                            ? null
+                            : 'Enter a valid username',
+                      ),
+                      const SizedBox(height: 16),
                       TextFormField(
                         controller: emailController,
                         decoration: InputDecoration(

@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import '../../../core/services/api_service.dart'; // Import your API service
+import 'package:inventrack_frontend/core/services/auth_api_service.dart';
+import 'package:provider/provider.dart';
+import '../../../core/providers/user_provider.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -25,12 +27,29 @@ class _LoginScreenState extends State<LoginScreen> {
         password: passwordController.text,
       );
 
+      print('DEBUG: login result = $result');
+
       if (result['success'] == true) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Login successful!')),
-        );
-        final userRole = result['data']['role'];
-        if (userRole == 'staff') {
+        // Try to get user object, or fallback to top-level fields
+        final user = result['data']?['user'] ?? result['data'];
+        if (user == null || user['email'] == null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                content: Text('Login failed: No user data returned.')),
+          );
+          return;
+        }
+        final email = user['email'];
+        final staffName = user['username'] ?? '';
+        final role = user['role'] ?? 'user';
+
+        final userProvider = Provider.of<UserProvider>(context, listen: false);
+        userProvider.setEmail(email);
+        userProvider.setStaffName(staffName);
+
+        await userProvider.fetchAndSetUserInfo(email: email);
+
+        if (role == 'staff') {
           Navigator.pushReplacementNamed(context, '/dashboard');
         } else {
           Navigator.pushReplacementNamed(context, '/product-feed');
@@ -82,7 +101,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             Animate(
                               effects: [
                                 FadeEffect(duration: 600.ms),
-                                ScaleEffect()
+                                const ScaleEffect()
                               ],
                               child: CircleAvatar(
                                 radius: 36,

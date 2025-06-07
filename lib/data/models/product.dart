@@ -27,6 +27,8 @@ class Product {
         image: json['image'] ?? '',
       );
 
+  get category => null;
+
   static double _parsePrice(dynamic value) {
     if (value == null) return 0.0;
     if (value is num) return value.toDouble();
