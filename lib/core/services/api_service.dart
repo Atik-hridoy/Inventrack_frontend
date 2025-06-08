@@ -10,7 +10,7 @@ class ApiService {
   // Base URL depending on platform
   static String get baseUrl {
     if (kIsWeb) {
-      return 'http://192.168.1.4:8000/api'; // Replace with your local IP
+      return 'http://192.168.1.7:8000/api'; // Replace with your local IP
     } else if (Platform.isAndroid) {
       return 'http://10.0.2.2:8000/api';
     } else {

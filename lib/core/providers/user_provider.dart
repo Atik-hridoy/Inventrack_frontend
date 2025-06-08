@@ -5,8 +5,11 @@ import '../services/api_service.dart';
 class UserProvider extends ChangeNotifier {
   String? _staffName;
   String? _email;
+  String? _username; // <-- Add this
+
   String? get staffName => _staffName;
   String? get email => _email;
+  String? get username => _username; // <-- Add this
 
   void setStaffName(String name) {
     _staffName = name;
@@ -15,6 +18,12 @@ class UserProvider extends ChangeNotifier {
 
   void setEmail(String email) {
     _email = email;
+    notifyListeners();
+  }
+
+  void setUsername(String username) {
+    // <-- Add this
+    _username = username;
     notifyListeners();
   }
 
@@ -32,6 +41,7 @@ class UserProvider extends ChangeNotifier {
       if (user != null) {
         setStaffName(user['first_name'] ?? user['username'] ?? '');
         setEmail(user['email']);
+        setUsername(user['username'] ?? ''); // <-- Set username
       }
     }
   }
@@ -39,6 +49,7 @@ class UserProvider extends ChangeNotifier {
   void clear() {
     _staffName = null;
     _email = null;
+    _username = null; // <-- Clear username
     notifyListeners();
   }
 }

@@ -216,6 +216,16 @@ class _DashboardScreenState extends State<DashboardScreen>
         elevation: 0,
         backgroundColor: Colors.blueAccent,
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: 'Logout',
+            onPressed: () {
+              // Optionally clear user session/provider here
+              Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+            },
+          ),
+        ],
       ),
       body: Stack(
         children: [

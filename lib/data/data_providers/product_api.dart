@@ -10,7 +10,7 @@ class ApiService {
   static String get baseUrl {
     if (kIsWeb) {
       // For Flutter Web, use your machine's LAN IP (not localhost or 127.0.0.1)
-      return 'http://192.168.1.4:8000/api'; // <-- Replace with your real LAN IP
+      return 'http://192.168.1.7:8000/api'; // <-- Replace with your real LAN IP
     } else if (Platform.isAndroid) {
       return 'http://10.0.2.2:8000/api';
     } else {
@@ -199,6 +199,13 @@ class ProductApiService {
   static Future<Map<String, dynamic>> getProductFeed() async {
     // Matches: /inventory/
     return await ApiService.get('inventory/');
+  }
+
+  /// Fetches products by category (using ?category=...)
+  static Future<Map<String, dynamic>> getProductsByCategory(
+      String category) async {
+    // Matches: /inventory/?category=electronics
+    return await ApiService.get('inventory/?category=$category');
   }
 
   /// Fetches a single product by ID.
