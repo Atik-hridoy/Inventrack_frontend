@@ -7,6 +7,7 @@ import 'package:inventrack_frontend/features/product/screens/add_product_screen.
 import 'package:inventrack_frontend/features/product/screens/edit_product_screen.dart';
 import '../features/auth/screens/login_screen.dart';
 import '../features/dashboard/screens/dashboard_screen.dart';
+import '../features/accounts/user_account_screen.dart'; // <-- Add this import
 
 class AppRoutes {
   static final routes = <String, WidgetBuilder>{
@@ -17,11 +18,12 @@ class AppRoutes {
     '/forgot-password': (context) => const ForgotPasswordScreen(),
     '/product-list': (context) => const ProductListScreen(),
     '/add-product': (context) => const AddProductScreen(),
+    '/account': (context) => const UserAccountScreen(), // <-- Add this route
     '/edit-product': (context) {
       final args = ModalRoute.of(context)!.settings.arguments;
       if (args == null || args is! Map<String, dynamic>) {
         // Handle error or show a fallback screen
-        return Scaffold(
+        return const Scaffold(
           body: Center(child: Text('No product data provided')),
         );
       }
