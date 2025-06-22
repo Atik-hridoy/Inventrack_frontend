@@ -5,6 +5,14 @@ import 'api_service.dart';
 class AuthApiService {
   static String get baseUrl => ApiService.baseUrl;
 
+  static String? _authToken;
+
+  static void setAuthToken(String? token) {
+    _authToken = token;
+  }
+
+  static String? getAuthToken() => _authToken;
+
   /// Register a new user
   static Future<Map<String, dynamic>> register({
     required String email,
@@ -67,5 +75,35 @@ class AuthApiService {
         'error': 'Network or parsing error: ${e.toString()}',
       };
     }
+  }
+
+  /// Update user profile and add to history
+  static Future<bool> updateProfileHistory({
+    required String username,
+    required String email,
+    required String phone,
+    required String street,
+    required String house,
+    required String district,
+    required String nickname,
+  }) async {
+    final data = {
+      'username': username,
+      'email': email,
+      'phone': phone,
+      'street': street,
+      'house': house,
+      'district': district,
+      'nickname': nickname,
+    };
+    final token = getAuthToken();
+    final response = await ApiService.post(
+      'accounts/history/',
+      data,
+      additionalHeaders:
+          token != null ? {'Authorization': 'Bearer $token'} : null,
+      debug: true,
+    );
+    return response['success'] == true;
   }
 }

@@ -10,7 +10,7 @@ class ApiService {
   static String get baseUrl {
     if (kIsWeb) {
       // For Flutter Web, use your machine's LAN IP (not localhost or 127.0.0.1)
-      return 'http://192.168.1.7:8000/api'; // <-- Replace with your real LAN IP
+      return 'http://192.168.0.104:8000/api'; // <-- Replace with your real LAN IP
     } else if (Platform.isAndroid) {
       return 'http://10.0.2.2:8000/api';
     } else {
@@ -392,5 +392,39 @@ class ProductApiService {
   static Future<Map<String, dynamic>> getProductModifications() async {
     // Matches: /inventory/modifications/
     return await ApiService.get('inventory/modifications/');
+  }
+
+  /// Fetches all products with their current stock (for stock management)
+  static Future<Map<String, dynamic>> getProductsWithStock() async {
+    // Matches: /inventory/with-stock/
+    return await ApiService.get('inventory/with-stock/');
+  }
+
+  /// Stock In: Adds stock to a product
+  static Future<Map<String, dynamic>> stockIn(
+      int productId, int quantity, String? note) async {
+    // Matches: /inventory/stock-in/
+    return await ApiService.post('inventory/stock-in/', {
+      'product': productId,
+      'quantity': quantity,
+      if (note != null && note.isNotEmpty) 'note': note,
+    });
+  }
+
+  /// Stock Out: Removes stock from a product
+  static Future<Map<String, dynamic>> stockOut(
+      int productId, int quantity, String? note) async {
+    // Matches: /inventory/stock-out/
+    return await ApiService.post('inventory/stock-out/', {
+      'product': productId,
+      'quantity': quantity,
+      if (note != null && note.isNotEmpty) 'note': note,
+    });
+  }
+
+  /// Fetches stock movement log for a product
+  static Future<Map<String, dynamic>> getStockLog(int productId) async {
+    // Matches: /inventory/stock-log/<product_id>/
+    return await ApiService.get('inventory/stock-log/$productId/');
   }
 }
