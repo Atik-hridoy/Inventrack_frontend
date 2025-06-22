@@ -5,6 +5,7 @@ import 'package:inventrack_frontend/features/product/screens/product_feed_screen
 import 'package:inventrack_frontend/features/product/screens/product_list_screen.dart';
 import 'package:inventrack_frontend/features/product/screens/add_product_screen.dart';
 import 'package:inventrack_frontend/features/product/screens/edit_product_screen.dart';
+import 'package:inventrack_frontend/features/stock/stock_management_screen.dart';
 import '../features/auth/screens/login_screen.dart';
 import '../features/dashboard/screens/dashboard_screen.dart';
 import '../features/accounts/user_account_screen.dart'; // <-- Add this import
@@ -29,6 +30,7 @@ class AppRoutes {
       }
       return EditProductScreen(product: args);
     },
+    '/stock-management': (context) => const StockManagementScreen(),
     // Add more routes as needed
   };
 }

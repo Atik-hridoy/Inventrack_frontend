@@ -8,7 +8,6 @@ void main() {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => UserProvider()),
-        // ...other providers
       ],
       child: const InventrackApp(),
     ),

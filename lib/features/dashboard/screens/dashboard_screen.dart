@@ -270,7 +270,6 @@ class _DashboardScreenState extends State<DashboardScreen>
   @override
   Widget build(BuildContext context) {
     final staffName = Provider.of<UserProvider>(context).staffName ?? '';
-    final email = Provider.of<UserProvider>(context).email ?? '';
     final media = MediaQuery.of(context);
     final width = media.size.width < 900
         ? media.size.width * 0.98
@@ -355,16 +354,18 @@ class _DashboardScreenState extends State<DashboardScreen>
                         _buildSectionTitle('Analytics', titleFont),
                         _buildSimpleBarChart(width),
                         const SizedBox(height: 24),
+                        // Remove Add Product and Product List buttons, add Stock Management button
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Expanded(
+                            SizedBox(
+                              width: 260,
                               child: ElevatedButton.icon(
                                 onPressed: () {
-                                  Navigator.pushNamed(context, '/add-product');
+                                  Navigator.pushNamed(context, '/stock-management');
                                 },
-                                icon: const Icon(Icons.add),
-                                label: const Text('Add Product'),
+                                icon: const Icon(Icons.inventory_2),
+                                label: const Text('Stock Management'),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.blueAccent,
                                   padding:
@@ -373,26 +374,6 @@ class _DashboardScreenState extends State<DashboardScreen>
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(12),
                                   ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: OutlinedButton.icon(
-                                onPressed: () {
-                                  Navigator.pushNamed(context, '/product-list');
-                                },
-                                icon: const Icon(Icons.list),
-                                label: const Text('Product List'),
-                                style: OutlinedButton.styleFrom(
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 14),
-                                  textStyle: const TextStyle(fontSize: 16),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  side: const BorderSide(
-                                      color: Colors.blueAccent, width: 2),
                                 ),
                               ),
                             ),

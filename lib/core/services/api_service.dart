@@ -5,12 +5,13 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'auth_api_service.dart';
 
 class ApiService {
   // Base URL depending on platform
   static String get baseUrl {
     if (kIsWeb) {
-      return 'http://192.168.1.7:8000/api'; // Replace with your local IP
+      return 'http://192.168.0.104:8000/api'; // Replace with your local IP
     } else if (Platform.isAndroid) {
       return 'http://10.0.2.2:8000/api';
     } else {
@@ -38,7 +39,20 @@ class ApiService {
 
       if (debug) print('🌐 POST $url');
 
-      final headers = {...defaultHeaders, ...?additionalHeaders};
+      // Always try to add the auth token if available
+      final token = AuthApiService.getAuthToken();
+      String? tokenValue;
+      if (token is String) {
+        tokenValue = token;
+      } else {
+        tokenValue = null;
+      }
+      final headers = {
+        ...defaultHeaders,
+        if (tokenValue != null && tokenValue.isNotEmpty)
+          'Authorization': 'Bearer $tokenValue',
+        ...?additionalHeaders,
+      };
       final encodedBody = jsonEncode(data);
 
       if (debug) {
@@ -68,8 +82,25 @@ class ApiService {
 
       if (debug) print('🌐 GET $url');
 
-      final response = await http
-          .get(url, headers: {...defaultHeaders, ...?headers}).timeout(timeout);
+      // Always try to add the auth token if available
+      final token = AuthApiService.getAuthToken();
+      String? tokenValue;
+      if (token is String) {
+        tokenValue = token;
+      } else {
+        tokenValue = null;
+      }
+      final mergedHeaders = {
+        ...defaultHeaders,
+        if (tokenValue != null && tokenValue.isNotEmpty)
+          'Authorization': 'Bearer $tokenValue',
+        ...?headers,
+      };
+
+      if (debug) print('📤 Headers: $mergedHeaders');
+
+      final response =
+          await http.get(url, headers: mergedHeaders).timeout(timeout);
 
       return _processResponse(response, debug: debug);
     } catch (e) {
@@ -86,7 +117,6 @@ class ApiService {
 
     if (debug) {
       print('📥 Status: $status');
-      print('📦 Body: ${response.body}');
     }
 
     if (_isHtml(response)) {
